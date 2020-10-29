@@ -3,6 +3,7 @@
 - Array vs Linked List
 - Stack & Queue
 - Tree
+- Hash Table
 
 ## Array vs Linked List
 
@@ -77,3 +78,35 @@
 
 1. BST 특성을 유지하며 노드를 삭제한다. node의 자식 갯수에 따라 rotation 방법이 상이하다.
 2. Black node가 삭제 된 경우에만 RBT특성을 위배하기에 해당 노드 -1 경로에 black node를 하나 추가하도록 rotation한다.
+
+## Hash Table
+
+> 내부에서 배열을 사용하여서 저장하기에 빠른 탐색 속도를 가진다. average case(!collision)에 대한 시간복잡도는 O(1)
+> Hash Table은 Hash Function을 사용하여 유니크 키(고유한 숫자)를 만들어낸 뒤 인덱스로 사용한다.
+
+1. 삽입 연산과, 삭제시 추가적인 비용 없이 할 수 있는 구조이고, 데이터를 탐색할때 역시 추가적인 비용이 없는 것을 목표로 한다.
+2. 자바스크립트의 경우 Object가 Hash Table과 같은 방식으로 만들어진다. 다만 hash Map이 가진 장점들이 없으니 서로 용도에 맞게 쓰자.
+
+### Hash Function
+
+1. Hash Function(Hash Method)에서 반환한 고유 숫자 값을 HashCode라고 지칭한다.
+2. Hash Function은 저장 되는 key 값을 작은 범위의 값들로 바꿔준다.
+3. 어설픈 Hash Function을 사용하여 서로 다른 키 값으로 같은 HashCode를 도출하는 경우를 Collision 이라고 한다. 동일한 키값에 복수 개의 데이터가 존재하는 것.
+4. 좋은 Hash Function의 조건 : key 전부를 참조 해서 Hash, Collision 을 배제가 아닌 최소화 (메모리 문제)하는 것.
+
+### Resolve Conflict
+
+1. Open Address(개방 주소)방식 : 해시 충돌 발생시 다른 해시 버킷에 해당자료를 삽입하는 방법으로 선형 탐색(Linear Probing), 2차 탐색(Quadratic Probing), 더블 해싱 탐색(Double Hashing Probing)이 있다. 데이터를 저장할 버킷을 찾지 못하면 다시 탐색 시작 위치까지 돌아 올 수 있다.
+2. 선형 조사 : 순차 탐색 비어 있는 버킷을 찾을때 까지 진행, 2차 탐색 : 2차 함수를 이용해 탐색할 위치를 찾기, 더블 해싱 탐색 : 2차 해쉬 함수를 이용해 새로운 주소를 할당 가장 연산량이 많음
+3. Separate Chaining(분리 연결법) 방식 : 일반적으로 개방 주소 방식 보다 빠르다, 개방 주소 방식은 버킷 밀도가 높아질 수록 Worst Case 빈도가 높아지기 때문, 보조 해시 함수를 통해 조정이 가능하다면 Worst Case 빈도를 줄일 수 있는 방법으로 연결리스트, 트리 가 있다. 자바 7에서는 이 방식으로 Hash Map을 구현한다.
+4. 연결리스트 : 각각의 버킷(bucket)을 연결리스트로 만들어 collision 발생시 해당 버킷 리스트에 추가한다. 리스트 방식의 장점인 삭제 및 삽입이 간단, 단점인 작은 데이터를 저장할때 리스트 자체의 오버헤드가 크다. 개방 주소 방식에 비해 테이블 확장을 늦출 수 있다.
+5. 트리(RBT) : 분리연결법과 동일 연결리스트를 트리로 대체한다. 연결리스트와 트리의 분기점은 key-value 쌍의 개수이다. 적다면 연결리스트를 사용한다. 그 이유는 트리 구조의 메모리 사용량 데이터 갯수가 적을떄는 연결리스트 방식과 Worst Case 차이가 거의 없다.
+6. 데이터가 적다는 기준은 하나의 버킷에 있는 key-value 쌍의 갯수가 6과 8일때 변경시 소요 되는 비용을 줄이는 목적이다.
+7. 일단 두 방식 모두 Worst Case 에서 O(M)이다. 하지만 Open Address방식은 연속된 공간에 데이터를 저장하기 때문에 Separate Chaining에 비해 캐시 효율이 높다. 따라서 데이터의 개수가 충분히 적다면 Open Address방식이 Separate Chaining보다 더 성능이 좋다. 한 가지 차이점이 더 존재한다. Separate Chaining방식에 비해 Open Address방식은 버킷을 계속해서 사용한다. 따라서 Separate Chaining 방식은 테이블의 확장을 보다 늦출 수 있다.
+8. 보조 해시 함수(Supplement Hash Function) : key의 HashCode를 변경하여 Collision 충돌 가능성을 줄이는 것. 분리 연결법에 보조로 사용.
+
+### 해시 버킷 동적 확장(Resize)
+
+1. 해시 버킷 갯수가 적으면 메모리 사용량을 줄일 수 있지만 해시 충돌로 성능 손실이 발생한다.
+2. HashMap은 key-value 쌍 데이터가 일정 개수 이상이 되면 버킷 개수를 2배로 늘린다.
+3. 리사이즈의 임계점은 해시버킷 갯수의 load factor다. load factor은 75% 즉 0.75.
