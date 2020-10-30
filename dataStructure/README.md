@@ -1,14 +1,15 @@
 # Data Structure
 
-- Array vs Linked List
-- Stack & Queue
-- Tree
-- Hash Table
+- [Array vs Linked List](#array-vs-linked-list)
+- [Stack & Queue](#stack--queue)
+- [Tree](#tree)
+- [Hash Table](#hash-table)
+- [Graph](#graph)
 
 ## Array vs Linked List
 
-> Array는 논리적 저장순서와 물리적 저장순서가 일치하는 자료형. index를 알면 O(1)로 탐색(random access)이 가능하다. 크기가 고정된 자료구조
-> Linked List는 논리적 저장순서와 물리적 저장순서가 일치하지 않는 자료형, 각 노드는 다음 노드의 주소만 가지고 있다.
+> Array는 논리적 저장순서와 물리적 저장순서가 일치하는 자료형. index를 알면 O(1)로 탐색(random access)이 가능하다. 크기가 고정된 자료구조  
+> Linked List는 논리적 저장순서와 물리적 저장순서가 일치하지 않는 자료형, 각 노드는 다음 노드의 주소만 가지고 있다.  
 > Array는 탐색에 유리하고 Linked List는 데이터의 삽입과 삭제에 유리하다
 
 1. Array는 탐색과정은 O(1)로 처리가 가능하지만 해당 데이터를 삭제하거나 삽입을 할 경우 다른 데이터들을 조정해주는 작업이 필요하기에 최대 O(n)의 시간복잡도를 가진다.
@@ -18,8 +19,8 @@
 
 ## Stack & Queue
 
-> 선형 자료구조는 데이터를 순차적으로 나열시킨 자료구조, 비선형 자료구조는 하나의 데이터 뒤에 여러개의 데이터가 존재가능한 자료구조.
-> 스택과 큐는 선형 자료구조 일종이다. Stack은 LIFO, Queue는 FIFO이 그 특징
+> 선형 자료구조는 데이터를 순차적으로 나열시킨 자료구조, 비선형 자료구조는 하나의 데이터 뒤에 여러개의 데이터가 존재가능한 자료구조.  
+> 스택과 큐는 선형 자료구조 일종이다. Stack은 LIFO, Queue는 FIFO이 그 특징  
 > Stack은 pop, push, stackTop, Queue는 Enqueue(push), Dequeue(shift), front
 
 1. 스택에 데이터가 넘치는 스택오버플로우, 데이터가 없는데 꺼내오는 스택언더플로우
@@ -27,7 +28,7 @@
 
 ## Tree
 
-> 트리는 비선형 자료구조 중 하나이다.계층적 관계(Hierarchical Relationship)를 표현한다.
+> 트리는 비선형 자료구조 중 하나이다.계층적 관계(Hierarchical Relationship)를 표현한다.  
 > 트리는 Node(노드), Edge(간선), Root Node(루트 노드), Terminal Node(left, 단말노드), Internal Node(내부 노드, 비단말) 로 구성 되어있다.
 
 ### Binary Tree(이진 트리)
@@ -81,7 +82,7 @@
 
 ## Hash Table
 
-> 내부에서 배열을 사용하여서 저장하기에 빠른 탐색 속도를 가진다. average case(!collision)에 대한 시간복잡도는 O(1)
+> 내부에서 배열을 사용하여서 저장하기에 빠른 탐색 속도를 가진다. average case(!collision)에 대한 시간복잡도는 O(1)  
 > Hash Table은 Hash Function을 사용하여 유니크 키(고유한 숫자)를 만들어낸 뒤 인덱스로 사용한다.
 
 1. 삽입 연산과, 삭제시 추가적인 비용 없이 할 수 있는 구조이고, 데이터를 탐색할때 역시 추가적인 비용이 없는 것을 목표로 한다.
@@ -110,3 +111,46 @@
 1. 해시 버킷 갯수가 적으면 메모리 사용량을 줄일 수 있지만 해시 충돌로 성능 손실이 발생한다.
 2. HashMap은 key-value 쌍 데이터가 일정 개수 이상이 되면 버킷 개수를 2배로 늘린다.
 3. 리사이즈의 임계점은 해시버킷 갯수의 load factor다. load factor은 75% 즉 0.75.
+
+## Graph
+
+> 그래프에는 크게 5종류가 있는데 무방향(방향)그래프, 가중치 그래프, 연결(비연결)그래프, 사이클(비순환) 그래프, 완전 그래프가 있다. Tree도 비순환 방향 그래프의 일종이다.  
+> 그래프는 정점(Vertex)과 간선(Edge)의 집합이다. 정점에 연결된 간선의 개수를 정점의 차수(Degree)라 지칭하고, 방향 그래프(Directed Graph)는 간선에 방향성이 존재해서 진출 차수(OutDegree, 외차수)와 진입 차수(InDegree, 내차수)가 존재한다.  
+> 경로 길이(Path Length) : 경로를 구성하는데 사용된 Edge의 수, 단순경로(Simple Path) : 경로중 반복되는 Vertex가 없는 경로, 사이클(cycle) : 경로 시작과 끝 Vertex가 동일한 경우.
+
+1. 가중치 그래프(Weight Graph)는 간선에 가중치 정보를 두어서 구성한 그래프를 말한다.
+2. 부분 그래프 (Sub Graph)는 한 그래프의 일부 정점과 간선으로 이루어진 그래프(부분 집합).
+3. 그래프는 네트워크 모델이며(루트, 부모 자식 개념이 없다.), 2개 이상의 경로가 가능하며, 순회는 DFS, BFS 방식으로 이루어진다.
+4. 무방향 그래프는 Edge를 (VertexA, VertexB)로 표기 방향 그래프는 <>로 표기한다.
+5. 연결 그래프(Connected Graph)는  무방향 그래프 중 모든 정점이 연결된 그래프다. 비연결은 반대
+6. 완전 그래프(Complete Graph)는 모든 정점이 서로 연결된 그래프를 말한다. 무방향 완전 그래프의 간선 수는 (Vertex)n * (n - 1) / 2 다.
+7. 최소 신장 트리(Minimum Spanning Tree) : 그래프의 Spanning Tree(그래프의 모든 정점이 사이클 없이 연결된 것) 중 Edge Weight 합이 최소인 tree.
+
+
+### 그래프를 구현하는 두 방법
+
+1. 인접 행렬(Adjacent Matrix, 정방 행렬) : 해당 위치의 Value 값을 통해서 Vertex 간의 연결관계를 O(1)으로 파악 할 수 있다. Edge 개수와 무관하게 V ^ 2 의 Space Complexity를 갖는다. Dense Graph를 표현할때 적절한 방법이다.
+2. 인접 리스트(Adjacent List, 연결 리스트) : Vertex의 인접 리스트를 확인 해봐야 하므로 Vertex 간 연결 확인에 시간이 걸린다. O(E + V) 의Space Complexity를 갖는다. Sparse Graph를 표현 하는데 적당한 방법이다.
+
+### 그래프 탐색(DFS, BFS)
+
+1. 깊이 우선 탐색(Depth First Search: DFS) : 임의의 Vertex부터 연결된 다른 Vertex로 계속 나아가는 방식으로 탐색 해서 연결된 Vertex가 없을때 다시 그전 단계로 돌아가서 다시 탐색을 반복하는 방법, 왔던 길을 되돌아가는 방식으로 탐색, Stack을 사용하며 시간복잡도는 O(V + E)다.
+2. 너비 우선 탐색(Breadth First Search: BFS) : 임의의 Vertex로 부터 연결된 모든 정점으로 나아가는 방식으로 탐색(Tree 에서의 Level Order Traversal 형식) Queue를 사용하며 시간 복잡도는 O(V+E) 단 BFS로 구한 경로는 최단 경로이다.
+
+### Kruskal Algorithm
+
+1. 크러스컬 알고리즘은 최소 신장 트리를 찾는 알고리즘이다. O(E log V) 시간복잡도를 가진다.
+2. 초기화 작업으로 edge 없이 vertex 들만으로 그래프를 구성한다.
+3. Weight 가 제일 작은 Edge 부터 검토한다. 그러기 위해선 Edge Set 을 Non-Decreasing 으로 Sorting 해야 한다.
+4. 가장 작은 Weight 에 해당하는 Edge 를 추가하는데 추가할 때 그래프에 Cycle 이 생기지 않는 경우에만 추가한다.
+5. Spanning Tree 가 완성되면 모든 Vertex 들이 연결된 상태로 종료가 되고 완성될 수 없는 그래프에 대해서는 모든 Edge 에 대해 판단이 이루어지면 종료된다.
+6. Cycle 판단 법: 정점 에 set-id라는 것을 추가적으로 부여한다. 그리고 초기화 과정에서 모두 1~n 까지의 값으로 각각의 정점 들을 초기화 한다. 여기서 0 은 어떠한 Edge 와도 연결되지 않았음을 의미하게 된다. 그리고 연결할 때마다 set-id를 하나로 통일시키는데, 값이 동일한 set-id 개수가 많은 set-id 값으로 통일시킨다.
+
+### Prim Algorithm
+
+1. 프림 알고리즘은 가중치가 있는 무향 그래프에서 최소 비용 신장 트리 를 찾는 알고리즘이다. 이진힙을 이용한 방식 기준 O(E log V)의 시간복잡도를 가진다.
+2. 초기화 과정에서 한 개의 Vertex 로 이루어진 초기 그래프 A 를 구성한다. 
+3. 그래프 A 내부에 있는 Vertex 로부터 외부에 있는 Vertex 사이의 Edge 를 연결하는데 그 중 가장 작은 Weight 의 Edge 를 통해 연결되는 Vertex 를 추가한다.
+4. 어떤 Vertex 건 간에 상관없이 Edge 의 Weight 를 기준으로 연결하는 것.
+5. 연결된 Vertex 는 그래프 A 에 포함된다. 
+6. 위 과정을 반복하고 모든 vertex 들이 연결되면 종료한다. 
