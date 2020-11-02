@@ -1,7 +1,8 @@
 # Network
 
 - [HTTP의 GET 과 POST](#http의-get-과-post)
-- [TCP와 UDP의 비교](#TCP와-UDP의-비교)
+- [TCP와 UDP의 비교](#tcp와-udp의-비교)
+- [TCP 3-way-handshake](#tcp-3-way-handshake)
 
 ## HTTP의 GET 과 POST
 
@@ -22,3 +23,13 @@
 4. 전이중 : 전송이 양방향으로 동시에 일어날 수 있다.
 5. 점대점 : 각 연결이 정확히 2 개의 종단점을 가지고 있음을 의미한다. 
 6. TCP 는 멀티캐스팅이나 브로드캐스팅을 지원하지 않는다.
+
+## TCP 3-way-handshake
+
+> TCP의 연결(Connection Establishment)은 3-way-handshake 방식으로 이루어지며, 연결해제(Connection Termination)는 4-way-handshake 방식으로 이루어진다.  
+> SYN(Synchronize Sequence Number), ACK(Acknowledgement) 두가지 패킷이 연결에 쓰이고 거기다 FIN이라는 패킷이 더해져서 연결해제에 쓰인다.
+
+1. 연결 : 클라이언트가 서버에 SYN(a) => 서버가 클라이언트에 ACK(a + 1) + SYN(B) => 클라이언트가 서버에 ACK(B + 1) 연결 성립
+2. 해제 : 클라이언트가 FIN => 서버가 ACKTIMEOUT(데이터 전송 대기) => 또 서버가 FIN => 클라이언트가 ACK 연결 해제
+3. TCP Header은 Code Bit(Flg big)라는 부분이 존재하며 해당 부분은 6Bit로 이루어져 있고 Urg-Ack-Psh-Rst-Syn-Fin 순서로 이진 방식으로 해당 패킹의 종류를 구분한다.
+4. SYN 그중에서도 초기 SYN을 ISN은 0부터가 아닌 랜덤한 난수부터 시작 되며 그 이유는 서버측에서 패킷의 SYN을 보고 이전에 사용된 포트쌍을 사용시 이전 커넥션으로 인식하는 것을 방지하기 위해서이다.
