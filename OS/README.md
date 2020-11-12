@@ -2,6 +2,7 @@
 
 - [프로세스와 스레드](#프로세스와-스레드)
 - [멀티 스레드](#멀티-스레드)
+- [스케줄러](#스케줄러)
 
 ## 프로세스와 스레드
 
@@ -27,3 +28,18 @@
 4. 하지만 이로 인해 병목현상이 발생하여 성능이 저하될 가능성이 높다. 그러므로 과도한 락으로 인한 병목현상은 줄여야 한다.
 5. 멀티 스레드는 멀티 프로세스 보다 적은 자원(메모리등)을 소모하고 문맥 전환이 빠르지만 하나의 스레드가 오류가 나면 다른 스레드까지 영향을 받아 종료 될 수 있다. 
 6. 결국 멀티 프로세스는 안정성이 멀티 스레드보다 뛰어나며 자원소모가 심하고, 멀티 스레드는 자원 소모는 상대적으로 적은 대신 예외 상황의 안정성이나 동기화 문제 등 인프라적인 문제점이 존재한다.
+
+## 스케줄러
+
+> 스케줄러 어떤 프로세스에게 자원을 할당할지를 결정하는 운영체제 커널의 모듈.  
+> 스케줄러에는 단기(cpu), 중기(메모리), 장기(작업) 스케줄러가 존재한다.  
+> 프로세스를 스케줄링 하기 위한 Queue에는 세 가지 Job Queue : 현재 시스템 내 모든 프로세스 집합, Ready Queue : 현재 메모리 내에 있으면서 CPU를 기다리는 프로세스 집합, Device Queue : Device I/O 작업을 대기하고 있는 프로세스의 집합
+
+1. 장기 스케줄러(Long-term Scheduler or Job Scheduler) : 어떤 프로세스에 메모리에 할당하여 Ready Queue로 보낼지 결정한다. 디스크 와 메모리 사이의 스케줄링, 실행중인 멀티 프로세스 제어(degree of Multiprogramming), New => Ready(In Memory), 수행 속도가 상대적으로 느려도 됨.
+2. 현대 시분할 시스템(Time Sharing System)에서는 장기 스케줄러가 없다. 그냥 곧바로 메모리에 올라가 Ready 상태가 된다.
+3. 단기 스케줄러(Short-term Schduler or CPU Scheduler) : 어떤 프로세스에 CPU를 할당(scheduler dispatch)하여 Running 시킬지 결정한다. Ready Queue에 존재하는 프로세스 중 어떤 프로세스를 Running시킬지 결정 Ready => Running => Waiting => Ready, 수행 속도가 충분히 빨라야함.
+4. 중기 스케줄러(Medium-term Scheduler or Swapper) : 프로세스 중 일부러 부터 메모리를 통째로 빼앗아 디스크에 저장(Swap Out)하는 스케쥴러 여유공간을 마련한다. 프로세스에게서 memory 를 deallocate할 때는 봉쇄 상태를 가장 먼저 스왑시킨다.(CPU 획득할 가능성이 없어서) => 준비 큐로 이동하는 프로세스 스왑아웃, degree of Multiprogramming 제어, Ready => Suspended, 인 메모리 프로세스 조절 스케줄러
+5. 중지 준비(suspenden ready) : 준비 상태의 프로세스가 중기 스케줄러에 의해 디스크로 swap out, 봉쇄 중지(suspenden block) : 봉쇄 상태의 프로세스가 중기 스케줄러에 의해 디스크로 swap out
+
+
+
