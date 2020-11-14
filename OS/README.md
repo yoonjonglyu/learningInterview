@@ -3,6 +3,7 @@
 - [프로세스와 스레드](#프로세스와-스레드)
 - [멀티 스레드](#멀티-스레드)
 - [스케줄러](#스케줄러)
+- [CPU 스케줄러](#CPU-스케줄러)
 
 ## 프로세스와 스레드
 
@@ -41,5 +42,26 @@
 4. 중기 스케줄러(Medium-term Scheduler or Swapper) : 프로세스 중 일부러 부터 메모리를 통째로 빼앗아 디스크에 저장(Swap Out)하는 스케쥴러 여유공간을 마련한다. 프로세스에게서 memory 를 deallocate할 때는 봉쇄 상태를 가장 먼저 스왑시킨다.(CPU 획득할 가능성이 없어서) => 준비 큐로 이동하는 프로세스 스왑아웃, degree of Multiprogramming 제어, Ready => Suspended, 인 메모리 프로세스 조절 스케줄러
 5. 중지 준비(suspenden ready) : 준비 상태의 프로세스가 중기 스케줄러에 의해 디스크로 swap out, 봉쇄 중지(suspenden block) : 봉쇄 상태의 프로세스가 중기 스케줄러에 의해 디스크로 swap out
 
+## CPU 스케줄러
 
+> 스케줄링시 고려사항 선점형(Preemptive), 비선점형(Non-Preemptive), CPU 집중 프로세스(CPU Bound Process), 입출력 집중 프로세스(I/O Bound Process), 전면 프로세스, 후면 프로세스  
+> 프로세스 우선순위 커널 > 일반, 전면 > 후면, 대화 > 일괄처리, 입출력 집중 > CPU 집중
 
+1. 선점형(Preemptive) : 프로세스 CPU를 가져 올 수 있어 효율적인 운영 가능 잦은 문맥 교환으로 오버헤드가 많이 발생한다.
+2. 비선점형(Non-Preemptive) : 프로세스 CPU를 빼앗을 수 없어서 오버헤드가 상대적으로 적지만 배치에 따라 효율성 차이가 많이 난다.
+3. CPU 집중 프로레스(CPU Bound Process) : CPU를 많이 사용하여 CPU Burst(실행 시간, 구간)가 많은 프로세스.
+4. 입출력 집중 프로세스(I/O Bound Process) : 입출력을 많이 사용해 I/O Burst(처리 시간, 구간)가 많은 프로세스.
+5. 전면 프로세스 : GUI 운영체제 화면 맨앞에 놓여 입출력등 사용자와의 상호작용이 가능한(상호작용 프로세스) 문서편집기 등의 프로세스
+6. 후면 프로세스 : 사용자 입력 없이 작동하여 일괄 작업이 가능한(일괄작용 프로세스) 압출 등의 프로세스
+7. CPU(단기, 저수준) 스케줄러의 스케줄링 대상은 Ready Queue에 있는 프로세스들이다.
+
+### 스케줄링 알고리즘
+
+1. FCFS(First Come First Served) : 큐에 들어온 순서대로 처리, 비선점형, 호위효과(Convoy Effect) : 소요시간이 긴 프로세스가 먼저 도달하여 효율성을 낮추는 현상이 발생한다.
+2. SJF(Shortest - Job - First) : CPU Burst Time이 짧은 순서대로 처리, 비선점형, 기아상태(Starvation) : 사용시간이 긴 프로세스가 극단적으로 CPU를 할당 받지못한다. 공평성에 지나치게 위배됨.
+3. SRT(Shortest Remaining Time First) : 새로운 프로세스가 도착할때 마다 새로 스케줄링, 선점형 : 현재 프로세스 CPU Burst 보다 짧은 CPU Burst 프로세스가 도착하면 CPU를 뺏어 할당, 기아상태, CPU Burst time을 측정 할 수 없다.
+4. 우선순위(Priority Scheduling) : 우선 순위(정수로 작을수록 높다.)가 높은 순서대로 처리, 선점형 : 다음 우선순위가 높으면 뺏긴다, 비선점형 : 더 높은 우선순위는 Ready Queue Head로, 기아상태, 무기한 봉쇄(Indefinite Blocking) : 실행 준비는 되었으나 CPU를 사용 못하는 프로세스를 CPU가 무한 대기하는 상태, 노화(Aging) : 아무리 우선 순위가 낮은 프로세스라도 오래 기다리면 순위를 높인다.
+5. Round Robin : 각 프로세스는 동일한 할당 시간(Time Quantum)을 갖고 그 동안 처리하고 끝나지 않으면 선점(프로세스의 context를 save) 당하고 가장 뒤 순서를 가지기를 반복한다. CPU Burst가 랜덤인 프로세스들이 혼합시 효율적, 응답이 빨라지고 (프로세스 - 1)할당시간, 가장 공정한 스케줄링이다
+6. 단 라운드 로빈의 Time Quantum이 너무 커지면 FCFS와 같아진다. 또 너무 작아지면 스케줄링 알고리즘의 목적에는 이상적이지만 잦은 context switch 로 overhead 가 발생한다. 적당한 Time Quantum(보통 10 ~ 100ms)을 설정하는 것이 중요하다.
+7. 다단계 큐 (Multi-level Queue) : Ready Queue를 여러개로 분류하여 각기 다른 알고리즘으로 처리, 프로세스 특성에 따라 영구적으로 할당, 큐와 큐사이의 스케줄링(우선순위, 시분할) 필요, 
+7. 다단계 피드백 큐 (Multi-level Feedback Queue) : 기존 다단계 큐가 프로세스의 큐 단위 이동을 막아서 오버헤드를 줄인 대신 융통성이 부족하다는 점을 개선하기 위한 방법, 프로세스가 큐 사이를 이동하는 것이 허용, 낮은 우선순위의 큐에서 너무 오래 대기하는 프로세스들은 높은 곳으로 이동(노화)하여 기아 상태를 예방.
