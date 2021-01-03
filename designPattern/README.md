@@ -1,6 +1,7 @@
 # DesignPattern
 
 - [Singleton](#singleton)
+- [Prototype](#prototype)
 
 ## Singleton
 
@@ -64,4 +65,67 @@ const Singleton = (() => {
         }
     };
 })();    
+```
+
+## Prototype
+
+> 프로토타입 패턴은 생성 패턴 중 하나이다. 그중 객체 생성에 관한 패턴이다.  
+> 프로토타입 패턴은 서브클래싱을 필요로 하지 않는 대신, 초기화 동작을 필요로 한다.  
+> 생성할 객체들의 타입이 프로토타입인 인스턴스로부터 결정되도록 하며, 인스턴스는 새 객체를 만들기 위해 자신을 복제(clone)하게 된다.
+
+1. 프로토타입 패턴은 추상 팩토리 패턴과는 반대로 클라이언트 응용 프로그램 내에서 객체 창조자(Creator)를 서브 클래스(SubClass)하는 것을 피하게 해준다.
+2. 일반적으로 새로운 객체를 생성하는 일반적인 방법으로 객체를 생성하는 고유의 비용이 불가피하게 클때 이 비용을 감소시켜준다.
+3. 객체를 복사 생성하는 방식으로 다수의 객체를 생성할 경우 객체 생성 비용을 효과적으로 감소 시킬 수 있다. 또 서브 클래스 수를 줄일 수 있다.
+4. 원형 패턴의 핵심 요소 3가지 : Client 클래스는 복제 요청과 새로운 객체를 생성하는 역할, Prototype 클래스는 복제하는 인터페이스 정의, ConcreatePrototype 클래스는 복제하는 연산을 구현
+5. 자바스크립트는 기본적으로 프로토 타입 언어라서 딱히 뭔가 추가적으로 알아야 할 부분은 없는거 같다. 그저 객체 생성 비용에 대해서 고려해볼만하다.
+
+
+### 예제
+
+1.자바
+```java
+/** Prototype Class **/
+public class Cookie implements Cloneable {
+
+   public Object clone() {
+      try {
+         Cookie copy = (Cookie)super.clone();
+
+         //In an actual implementation of this pattern you might now change references to
+         //the expensive to produce parts from the copies that are held inside the prototype.
+
+         return copy;
+
+      }
+      catch(CloneNotSupportedException e) {
+         e.printStackTrace();
+         return null;
+      }
+   }
+}
+
+/** Concrete Prototypes to clone **/
+public class CoconutCookie extends Cookie { }
+
+/** Client Class**/
+public class CookieMachine {
+
+   private Cookie cookie;//could have been a private Cloneable cookie;
+
+   public CookieMachine(Cookie cookie) {
+      this.cookie = cookie;
+   }
+   public Cookie makeCookie() {
+      return (Cookie)cookie.clone();
+   }
+   public Object clone() { }
+
+   public static void main(String args[]) {
+      Cookie tempCookie =  null;
+      Cookie prot = new CoconutCookie();
+      CookieMachine cm = new CookieMachine(prot);
+      for (int i=0; i<100; i++)
+         tempCookie = cm.makeCookie();
+   }
+}
 ```
