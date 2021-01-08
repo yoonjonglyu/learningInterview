@@ -2,7 +2,8 @@
 
 - [Singleton](#singleton)
 - [Prototype](#prototype)
-- [Builder](#Builder)
+- [Builder](#builder)
+- [Factory Method](#factory-method)
 
 ## Singleton
 
@@ -314,4 +315,111 @@ const personInfoBuilder = (name) => {
         }
     };
 };
+```
+
+## Factory Method
+
+> 팩토리 메서드 패턴은 생성 패턴의 한 종류이다. 객체 생성에 관한 패턴이다.  
+> 팩토리 메서드 패턴은 객체 생성을 서브 클래스로 별도로 분리해 캡슐화 하는 패턴이다. 클래스간의 결합도를 낮추기 위한 것.  
+> 팩토리 메서드 패턴은 Product(공통 인터페이스), ConcreteProduct(객체가 생성되는 클래스), Creator(팩토리 메서드를 갖는 클래스), ConcreteCreator(팩토리 메서드 구현 클래스 ConcreateProduct 객체 생성)로 구성되어있다.
+
+1. 객체 생성을 전담하는 별도의 Factory 클래스를 이용(스트레인지, 싱글턴), 상속을 이용한다.
+2. 직접 객체를 생성해 사용하는 것을 방지하고 서브 클래스에 위임해서 의존성을 제거한다.
+3. 팩토리 매서드 패턴은 객체 생성 클래스간의 결합도를 낮추기 위한 것이다. 변경점이 생겼을때 최대한 다른 클래스에 영향이 가지 않도록한다.
+### 예제
+
+1.C#
+```C#
+public abstract class Pizza
+{
+    public abstract decimal GetPrice();
+
+    public enum PizzaType
+    {
+        HamMushroom, Deluxe, Seafood
+    }
+    public static Pizza PizzaFactory(PizzaType pizzaType)
+    {
+        switch (pizzaType)
+        {
+            case PizzaType.HamMushroom:
+                return new HamAndMushroomPizza();
+
+            case PizzaType.Deluxe:
+                return new DeluxePizza();
+
+            case PizzaType.Seafood:
+                return new SeafoodPizza();
+
+        }
+
+        throw new System.NotSupportedException("The pizza type " + pizzaType.ToString() + " is not recognized.");
+    }
+}
+public class HamAndMushroomPizza : Pizza
+{
+    private decimal price = 8.5M;
+    public override decimal GetPrice() { return price; }
+}
+
+public class DeluxePizza : Pizza
+{
+    private decimal price = 10.5M;
+    public override decimal GetPrice() { return price; }
+}
+
+public class SeafoodPizza : Pizza
+{
+    private decimal price = 11.5M;
+    public override decimal GetPrice() { return price; }
+}
+
+// Somewhere in the code
+...
+  Console.WriteLine( Pizza.PizzaFactory(Pizza.PizzaType.Seafood).GetPrice().ToString("C2") ); // $11.50
+...
+```
+2. 자바스크립트
+```js
+//Our pizzas
+function HamAndMushroomPizza(){
+  const price = 8.50;
+  this.getPrice = function(){
+    return price;
+  }
+}
+
+function DeluxePizza(){
+  const price = 10.50;
+  this.getPrice = function(){
+    return price;
+  }
+}
+
+function SeafoodPizza(){
+  const price = 11.50;
+  this.getPrice = function(){
+    return price;
+  }
+}
+
+//Pizza Factory
+function PizzaFactory(){
+  this.createPizza = function(type){
+     switch(type){
+      case "Ham and Mushroom":
+        return new HamAndMushroomPizza();
+      case "DeluxePizza":
+        return new DeluxePizza();
+      case "Seafood Pizza":
+        return new SeafoodPizza();
+      default:
+          return new DeluxePizza();
+     }
+  }
+}
+
+//Usage
+const pizzaPrice = new PizzaFactory().createPizza("Ham and Mushroom").getPrice();
+alert(pizzaPrice);
 ```
