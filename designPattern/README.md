@@ -4,6 +4,7 @@
 - [Prototype](#prototype)
 - [Builder](#builder)
 - [Factory Method](#factory-method)
+- [Abstract Factory](#abstract-Factory)
 
 ## Singleton
 
@@ -422,4 +423,149 @@ function PizzaFactory(){
 //Usage
 const pizzaPrice = new PizzaFactory().createPizza("Ham and Mushroom").getPrice();
 alert(pizzaPrice);
+```
+
+## Abstract Factory
+
+> 추상 팩토리 패턴은 생성 패턴의 하나이다, 그중 객체 생성을 위한 패턴이다.  
+> 구체적인 클래스에 의존하지 않고 서로 연관되거나 의존적인 객체들의 조합을 만드는 인터페이스를 제공 하는 패턴,다양한 구성요소 별로 이루어진 객체의 집합을 생성할때 유용하다.  
+> 추상 팩토리는 AbstractFactory(실제 팩토리 클래스의 공통 인터페이스), ConcreteFactory(추상 팩토리 클래스의 추상 메서드를 오버라이드 해서 제품생성), ConcreteProduct(구체적인 팩토리 클래스에서 생성되는 객체), AbstractProduct(제품들의 공통 인터페이스) 로 구성되어 있다
+
+1. 관련성 있는 여러 종류의 객체를 일관된 방식으로 생성하는데 유용하다. 싱글턴, 팩토리 매서드를 사용한다.
+2. 같은 종류의 완제품의 부품이 제각기 달라진다 하더라도 완제품 입장에서는 같은 종류의 부품을 사용한다는 점은 동일하다.
+3. 팩토리 메서드 패턴을 좀더 캡슐화해서 결합도를 낮춘 방법이라고 볼 수도 있다. mvc1 => mvc2처럼
+
+### 예제
+
+1.PHP
+```php
+interface Button
+{
+    public function paint();
+}
+
+interface GUIFactory
+{
+    public function createButton(): Button;
+}
+
+class WinFactory implements GUIFactory
+{
+    public function createButton(): Button
+    {
+        return new WinButton();
+    }
+}
+
+class OSXFactory implements GUIFactory
+{
+    public function createButton(): Button
+    {
+        return new OSXButton();
+    }
+}
+
+class WinButton implements Button
+{
+    public function paint()
+    {
+        echo "Windows Button";
+    }
+}
+
+class OSXButton implements Button
+{
+    public function paint()
+    {
+        echo "OSX Button";
+    }
+}
+
+$appearance = "osx";
+
+$factory = NULL;
+
+switch ($appearance) {
+    case "win":
+        $factory = new WinFactory();
+        break;
+    case "osx":
+        $factory = new OSXFactory();
+        break;
+    default:
+        break;
+}
+
+if ($factory instanceof GUIFactory) {
+    $button = $factory->createButton();
+    $button->paint();
+}
+```
+2.자바스크립트
+```js
+/** interface */
+class ButtonFactory {
+    createButton () {
+    }
+}
+class Button {
+    paint () {
+    }
+}
+/** Abstract Factory */
+class GUIFactory {
+    constructor(){
+        this._os = {};
+    }
+    setOs (os, factory) {
+       if(typeof os === "string" && factory.prototype.createButton){
+           this._os[os] = factory;
+
+           return this;
+       } 
+    }
+    create (os) {
+        const GUIFact = this._os[os];
+
+        return GUIFact ? new GUIFact() : null;
+    }
+}
+
+/** GUI Factory */
+class WinFactory extends ButtonFactory {
+    createButton () {
+        return new WinButton();   
+    }
+}
+class OSXFactory extends ButtonFactory{
+    createButton () {
+        return new OSXButton();   
+    }
+}
+
+/** product */
+class WinButton extends Button {
+    paint () {
+        console.log("Windows Button");
+    }
+}
+class OSXButton extends Button {
+    paint () {
+        console.log("OSX Button");
+    }
+}
+
+/** example */
+
+/** 추상 팩토리 생성 */
+const AbstractFactory = new GUIFactory();
+/** 추상 팩토리를 통한 Concrete Factory 생성 */
+const winGUI = AbstractFactory.setOs('win', WinFactory).create('win');
+const OSXGUI = AbstractFactory.setOs('OSX', OSXFactory).create('OSX');
+/** Concrete Factory를 통한 Concrete Product 생성 */
+const winGUIButton = winGUI.createButton();
+const OSXGUIButton = OSXGUI.createButton();
+winGUIButton.paint();
+OSXGUIButton.paint();
+
 ```
