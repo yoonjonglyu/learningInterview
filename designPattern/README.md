@@ -5,6 +5,7 @@
 - [Builder](#builder)
 - [Factory Method](#factory-method)
 - [Abstract Factory](#abstract-Factory)
+- [Adapter](#adapter)
 
 ## Singleton
 
@@ -280,7 +281,13 @@ class PersonInfoBuilder {
         return this;
     }
     build(){
-        return this;
+        return {
+            name : this.name,
+            age : this.age,
+            favoriteColor : this.favoriteColor,
+            favoriteAnimal : this.favoriteAnimal,
+            favoriteNumber : this.favoriteNumber
+        };
     }
 }
 ```
@@ -567,5 +574,81 @@ const winGUIButton = winGUI.createButton();
 const OSXGUIButton = OSXGUI.createButton();
 winGUIButton.paint();
 OSXGUIButton.paint();
+```
 
+## Adapter
+
+> 어댑터 패턴은 구조(Structural)패턴 중 하나이다. 객체 어댑터와 클래스 어댑터가 존재한다.  
+> 한 클래스의 인터페이스를 클라이언트에서 사용하고자 하는 다른 인터페이스로 변환한다. 어댑터 패턴을 사용하면 인터페이스 호환성 문제를 어느 정도 해결 가능하다.  
+> 어댑터 패턴은 Client(호출), Target(어댑터가 구현하는 인터페이스), Adapter(Client{Target}와 Adaptee 중간 연결), Adaptee(써드 파티, 변경되는 인터페이스) 구조로 구성되어있다.
+
+1. 호환되지 않는 여러 인터페이스를 클라이언트에서 그대로 활용 할 수 있게 만들어준다.
+2. 추후 인터페이스에 변경 사항이 있더라도 변경 내역이 어댑터 선에서 캡슐화 되기에 클라이언트 까지 영향이 가지 않는다.
+3. API와 호출 하는 클라이언트 간의 결합도를 낮추어주는 패턴이라고 볼 수 있다.
+
+### 예제
+
+1.파이썬 오브젝트 어댑터
+```py
+# Python code sample
+class Target(object):
+    def specific_request(self):
+        return 'Hello Adapter Pattern!'
+
+class Adapter(object):
+    def __init__(self, adaptee):
+        self.adaptee = adaptee
+
+    def request(self):
+        return self.adaptee.specific_request()
+
+client = Adapter(Target())
+print client.request()
+```
+2. 자바 클래스 어댑터
+```java
+/**
+ * Java code sample
+ */
+
+/* the client class should instantiate adapter objects */
+/* by using a reference of this type */
+interface Stack<T>
+{
+  void push (T o);
+  T pop ();
+  T top ();
+}
+
+/* DoubleLinkedList is the adaptee class */
+class DList<T>
+{
+  public void insert (DNode pos, T o) { ... }
+  public void remove (DNode pos) { ... }
+
+  public void insertHead (T o) { ... }
+  public void insertTail (T o) { ... }
+
+  public T removeHead () { ... }
+  public T removeTail () { ... }
+
+  public T getHead () { ... }
+  public T getTail () { ... }
+}
+
+/* Adapt DList class to Stack interface is the adapter class */
+class DListImpStack<T> extends DList<T> implements Stack<T>
+{
+  public void push (T o) {
+    insertTail (o);
+  }
+
+  public T pop () {
+    return removeTail ();
+  }
+
+  public T top () {
+    return getTail ();
+  }
+}
 ```
