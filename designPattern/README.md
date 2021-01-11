@@ -6,6 +6,7 @@
 - [Factory Method](#factory-method)
 - [Abstract Factory](#abstract-Factory)
 - [Adapter](#adapter)
+- [Composite](#composite)
 
 ## Singleton
 
@@ -650,5 +651,101 @@ class DListImpStack<T> extends DList<T> implements Stack<T>
   public T top () {
     return getTail ();
   }
+}
+```
+
+## Composite
+
+> 컴포지트 패턴은 구조 패턴 중 하나이다. 주로 객체의 관계를 정의할때 사용된다.  
+> 여러개의 객체들로 구성된 복합 객체와 단일 객체를 클라이언트 구분 없이 다룰 수 있다. 객체들의 관계를 트리구조로 부분-전체 계층을 표현한다.  
+> 컴포지트 패턴은 Component(구체적인 부분), Leaf(구체적인 부분 클래스), Composite(전체 클래스) 로 구성 되어있다.
+
+1. 컴포넌트라는 구체적인 객체들을 일반화(추상화)한 추상 클래스를 정의하고 해당 추상 클래스를 통해서 Leaf 와 Composite를 만든다.
+2. 컴포지트에서 Leaf를 추가하고 제거해서 하나의 컴포지트(부분-전체) 객체를 만든다.
+3. 컴포지트 패턴은 SOLID의 OCP를 준수한다.
+4. 간단히 생각하면 그냥 비슷한 구조로 짜인 것들을 한군데서 모아서 처리한다. 그런 방식으로 짜니 변경의 영향은 덜 받으면서 확장에는 용이한 것
+
+
+
+### 예제
+
+1.Java
+```java
+import java.util.List;
+import java.util.ArrayList;
+
+/** "Component" */
+interface Graphic {
+
+    //Prints the graphic.
+    public void print();
+
+}
+
+/** "Composite" */
+class CompositeGraphic implements Graphic {
+
+    //Collection of child graphics.
+    private List<Graphic> mChildGraphics = new ArrayList<Graphic>();
+
+    //Prints the graphic.
+    public void print() {
+        for (Graphic graphic : mChildGraphics) {
+            graphic.print();
+        }
+    }
+
+    //Adds the graphic to the composition.
+    public void add(Graphic graphic) {
+        mChildGraphics.add(graphic);
+    }
+
+    //Removes the graphic from the composition.
+    public void remove(Graphic graphic) {
+        mChildGraphics.remove(graphic);
+    }
+
+}
+
+
+/** "Leaf" */
+class Ellipse implements Graphic {
+
+    //Prints the graphic.
+    public void print() {
+        System.out.println("Ellipse");
+    }
+
+}
+
+
+/** Client */
+public class Program {
+
+    public static void main(String[] args) {
+        //Initialize four ellipses
+        Ellipse ellipse1 = new Ellipse();
+        Ellipse ellipse2 = new Ellipse();
+        Ellipse ellipse3 = new Ellipse();
+        Ellipse ellipse4 = new Ellipse();
+
+        //Initialize three composite graphics
+        CompositeGraphic graphic = new CompositeGraphic();
+        CompositeGraphic graphic1 = new CompositeGraphic();
+        CompositeGraphic graphic2 = new CompositeGraphic();
+
+        //Composes the graphics
+        graphic1.add(ellipse1);
+        graphic1.add(ellipse2);
+        graphic1.add(ellipse3);
+
+        graphic2.add(ellipse4);
+
+        graphic.add(graphic1);
+        graphic.add(graphic2);
+
+        //Prints the complete graphic (four times the string "Ellipse").
+        graphic.print();
+    }
 }
 ```
