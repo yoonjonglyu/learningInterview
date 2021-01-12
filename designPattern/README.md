@@ -7,6 +7,7 @@
 - [Abstract Factory](#abstract-Factory)
 - [Adapter](#adapter)
 - [Composite](#composite)
+- [Decorator](#decorator)
 
 ## Singleton
 
@@ -747,5 +748,102 @@ public class Program {
         //Prints the complete graphic (four times the string "Ellipse").
         graphic.print();
     }
+}
+```
+
+## Decorator
+
+> 데코레이터 패턴은 구조 패턴 중 하나이다. 객체 책임에 관한 패턴이다.  
+> 객체 결합을 통해서 기능을 동적으로 확장 가능한 패턴이다. 서브클래싱의 대안이 된다.  
+> 데코레이터 패턴은 Component(공통 기능을 정의), ConcreteComponent(기본 기능 클래스), Decorator(다수 존재하는 구체적인 Decorator 공통 기능 제공), ConcreteDecorator(Decorator 하위의 개별적인 기능들)
+
+1. 객체에 동적으로 새로운 책임을 추가 할 수 있고, 상속과 다르게 경우의 수를 위해서 여러 서브 클래스를 만들 필요가 없다.
+2. 전체 클래스에 새로운 기능을 추가할 필요는 없지만, 개별적인 객체에 새로운 책임을 추가할 필요가 있을때 대안이된다.
+3. 필요한 기능을 추가하는 다른 객체에다가 해당 구성요소를 둘러싸는 것. 이렇게 무엇인가를 감싸는 객체를 장식자(decorator)라고 한다.
+4. 장식자는 자신이 둘러싼 요소, 구성요소가 갖는 인터페이스를 자신도 동일하게 제공하므로, 장식자의 존재는 이를 사용하는 사용자에게 은닉된다.
+5. 장식자는 자신이 둘러싼 구성요소로 전달되는 요청을 중간에 가로채서 해당 구성요소에 전달해 줍니다.
+6. 그렇기 때문에 이 전달 과정의 앞뒤에 다른 작업을 추가로 할 수 있고, 여기에는 투명성이 존재하기 때문에 장식자의 중첩이 가능해져 이를 통해 책임 추가를 유연하게 무한정으로 가능하게 된다.
+
+### 예제
+
+1. c#
+```c#
+#include <iostream>
+
+using namespace std;
+
+/* Component (interface) */
+class Widget {
+
+public:
+  virtual void draw() = 0;
+  virtual ~Widget() {}
+};
+
+/* ConcreteComponent */
+class TextField : public Widget {
+
+private:
+   int width, height;
+
+public:
+   TextField( int w, int h ){
+      width  = w;
+      height = h;
+   }
+
+   void draw() {
+      cout << "TextField: " << width << ", " << height << '\n';
+   }
+};
+
+/* Decorator (interface) */
+class Decorator : public Widget {
+
+private:
+   Widget* wid;       // reference to Widget
+
+public:
+   Decorator( Widget* w )  {
+     wid = w;
+   }
+
+   void draw() {
+     wid->draw();
+   }
+
+   ~Decorator() {
+     delete wid;
+   }
+};
+
+/* ConcreteDecoratorA */
+class BorderDecorator : public Decorator {
+
+public:
+   BorderDecorator( Widget* w ) : Decorator( w ) { }
+   void draw() {
+      Decorator::draw();
+      cout << "   BorderDecorator" << '\n';
+   }
+};
+
+/* ConcreteDecoratorB */
+class ScrollDecorator : public Decorator {
+public:
+   ScrollDecorator( Widget* w ) : Decorator( w ) { }
+   void draw() {
+      Decorator::draw();
+      cout << "   ScrollDecorator" << '\n';
+   }
+};
+
+int main( void ) {
+
+   Widget* aWidget = new BorderDecorator(
+                     new ScrollDecorator(
+                     new TextField( 80, 24 )));
+   aWidget->draw();
+   delete aWidget;
 }
 ```
