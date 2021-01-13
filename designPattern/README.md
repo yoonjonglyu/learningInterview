@@ -8,6 +8,7 @@
 - [Adapter](#adapter)
 - [Composite](#composite)
 - [Decorator](#decorator)
+- [Bridge](#bridge)
 
 ## Singleton
 
@@ -845,5 +846,149 @@ int main( void ) {
                      new TextField( 80, 24 )));
    aWidget->draw();
    delete aWidget;
+}
+```
+
+## Bridge
+
+> 브릿지 패턴은 구조 패턴 중 하나이다.  
+> 구현과 추상 두개의 계층을 분리해서 서로 변형하기 수월하게 한 패턴이다.  
+> 브릿지 패턴은 Abstraction(기능 계층 최상위 추상 인터페이스 Implementor와 레퍼런스를 유지), RefinedAbstraction(기능 계층 확장 추상 클래스),Implementor(Abstraction 클래스 구현 인터페이스), ConcreteImplementor(실제 기능 구현)로 구성 되어있다.
+
+1. 브릿지는 기능을 구현하는 방법에서 추상 기능과 구현부를 나누어서 만드는 구조의 패턴이다.
+2. 어댑터 패턴과 많이 유사한데, 어댑터 패턴은 설계가 완료된후 특정 요구사항을 위해서 적용하는 것, 브릿지 패턴은 설계 중에 적용하는 차이가 있다.
+3. 추상, 구현 계층의 의존성주입을 통해서 두 계층의 결합도를 낮추고, 응집도를 높이기 위한 패턴이다. 즉 의존성 주입 설계를 통해서 결합도를 => 응집도로 전환하는 패턴
+
+### 예제
+
+1. Java
+```java
+interface DrawingAPI
+{
+    public void drawCircle(double x, double y, double radius);
+}
+
+/** "ConcreteImplementor" 1/2 */
+class DrawingAPI1 implements DrawingAPI
+{
+   public void drawCircle(double x, double y, double radius)
+   {
+        System.out.printf("API1.circle at %f:%f radius %f\n", x, y, radius);
+   }
+}
+
+/** "ConcreteImplementor" 2/2 */
+class DrawingAPI2 implements DrawingAPI
+{
+   public void drawCircle(double x, double y, double radius)
+   {
+        System.out.printf("API2.circle at %f:%f radius %f\n", x, y, radius);
+   }
+}
+
+/** "Abstraction" */
+interface Shape
+{
+   public void draw();                                            // low-level
+   public void resizeByPercentage(double pct);     // high-level
+}
+
+/** "Refined Abstraction" */
+class CircleShape implements Shape
+{
+   private double x, y, radius;
+   private DrawingAPI drawingAPI;
+   public CircleShape(double x, double y, double radius, DrawingAPI drawingAPI)
+   {
+       this.x = x;  this.y = y;  this.radius = radius;
+       this.drawingAPI = drawingAPI;
+   }
+
+   // low-level i.e. Implementation specific
+   public void draw()
+   {
+        drawingAPI.drawCircle(x, y, radius);
+   }
+   // high-level i.e. Abstraction specific
+   public void resizeByPercentage(double pct)
+   {
+        radius *= pct;
+   }
+}
+
+/** "Client" */
+class BridgePattern {
+   public static void main(String[] args)
+   {
+       Shape[] shapes = new Shape[2];
+       shapes[0] = new CircleShape(1, 2, 3, new DrawingAPI1());
+       shapes[1] = new CircleShape(5, 7, 11, new DrawingAPI2());
+
+       for (Shape shape : shapes)
+       {
+           shape.resizeByPercentage(2.5);
+           shape.draw();
+       }
+   }
+}
+```
+2. go
+```go
+package main
+
+import (
+	"fmt"
+)
+
+// Implementor
+type DrawingAPI interface {
+	drawCircle(float32, float32, float32)
+}
+
+// ConcreteImplementor 1/2
+type DrawingAPI1 struct{}
+
+func (d *DrawingAPI1) drawCircle(x float32, y float32, radius float32) {
+	fmt.Printf("API1.circle at %f:%f radius %f\n", x, y, radius)
+}
+
+// ConcreteImplementor 2/2
+type DrawingAPI2 struct{}
+
+func (d *DrawingAPI2) drawCircle(x float32, y float32, radius float32) {
+	fmt.Printf("API2.circle at %f:%f radius %f\n", x, y, radius)
+}
+
+// Abstraction
+type Shape interface {
+	draw()
+	resizeByPercentage(float32)
+}
+
+// Refined Abstraction
+type CircleShape struct {
+	x, y, radius float32
+	drawingAPI   DrawingAPI
+}
+
+// Implementation specific
+func (c *CircleShape) draw() {
+	c.drawingAPI.drawCircle(c.x, c.y, c.radius)
+}
+
+// Abstraction specific
+func (c *CircleShape) resizeByPercentage(pct float32) {
+	c.radius *= pct
+}
+
+// Client
+func main() {
+	shape1 := &CircleShape{1, 2, 3, &DrawingAPI1{}}
+	shape1.resizeByPercentage(2.5)
+	shape1.draw()
+
+	shape2 := &CircleShape{5, 7, 11, &DrawingAPI2{}}
+	shape2.resizeByPercentage(2)
+	shape2.draw()
 }
 ```
