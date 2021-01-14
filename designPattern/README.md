@@ -9,6 +9,7 @@
 - [Composite](#composite)
 - [Decorator](#decorator)
 - [Bridge](#bridge)
+- [Proxy](#proxy)
 
 ## Singleton
 
@@ -990,5 +991,136 @@ func main() {
 	shape2 := &CircleShape{5, 7, 11, &DrawingAPI2{}}
 	shape2.resizeByPercentage(2)
 	shape2.draw()
+}
+```
+
+## Proxy
+
+> 프록시 패턴은 구조 패턴 중 하나이다.  
+> 실제 객체 대신 대리자(가상) 객체를 통해 로직의 흐름을 제어하는 패턴이다.  
+> 프록시 패턴은 Client(호출자), Interface(공통 인터페이스), RealObject(실제 구현되는 객체), Proxy(실제 객체에 대한 참조를 가진 가상객체)로 구성 되어있다.
+
+1. 실제 객체를 대신해서 프록시가 로직의 흐름을 제어하기에 부가적인 작업을 수행하기 좋다.
+2. 실제 객체와 프록시나 같은 인터페이스를 구현하므로 사용하기 좋고, 큰 규모의 연산을 실제로 필요한 시점에 수행하기 좋다. 그러니까 로직 흐름 제어가 편리하다.
+3. Proxy 는 실제 객체에 인터페이스 구현을 위임한다. 추가적인 로직 흐름을 기존 구조에서 따로 캡슐화 하기 위한 방법이다.
+4. 프록시에는 원격 프록시, 가상 프록시, 보호 프록시, 방화벽 프록시, 스마트 레퍼런스 프록시, 캐싱 프록시, 동기화 프록시, 복잡도 숨김 프록시, 지연 복사 프록시 등이 있다.
+5. 프록시는 흐름제어만 캡슐화 할뿐이다. 결과 값 조작이나 변경은 프록시가 담당하는 책임이 아니다.
+6. 사실 디자인 패턴들은 그냥 SOLID원칙을 충실히 지킬뿐이다.
+
+### 예제
+1.Java
+```java
+import java.util.*;
+
+interface Image {
+    public void displayImage();
+}
+
+//on System A
+class RealImage implements Image {
+    private String filename;
+    public RealImage(String filename) {
+        this.filename = filename;
+        loadImageFromDisk();
+    }
+
+    private void loadImageFromDisk() {
+        System.out.println("Loading   " + filename);
+    }
+
+    @Override
+    public void displayImage() {
+        System.out.println("Displaying " + filename);
+    }
+}
+
+//on System B
+class ProxyImage implements Image {
+    private String filename;
+    private Image image;
+
+    public ProxyImage(String filename) {
+        this.filename = filename;
+    }
+
+    @Override
+    public void displayImage() {
+        if (image == null)
+           image = new RealImage(filename);
+
+        image.displayImage();
+    }
+}
+
+class ProxyExample {
+    public static void main(String[] args) {
+        Image image1 = new ProxyImage("HiRes_10MB_Photo1");
+        Image image2 = new ProxyImage("HiRes_10MB_Photo2");
+
+        image1.displayImage(); // loading necessary
+        image2.displayImage(); // loading necessary
+    }
+}
+```
+2. C#
+```c#
+using System;
+
+namespace Proxy
+{
+    class Program
+    {
+        interface IImage
+        {
+            void Display();
+        }
+
+        class RealImage : IImage
+        {
+            public RealImage(string fileName)
+            {
+                FileName = fileName;
+                LoadFromFile();
+            }
+
+            private void LoadFromFile()
+            {
+                Console.WriteLine("Loading " + FileName);
+            }
+
+            public String FileName { get; private set; }
+
+            public void Display()
+            {
+                Console.WriteLine("Displaying " + FileName);
+            }
+        }
+
+        class ProxyImage : IImage
+        {
+            public ProxyImage(string fileName)
+            {
+                FileName = fileName;
+            }
+
+            public String FileName { get; private set; }
+
+            private IImage image;
+
+            public void Display()
+            {
+                if (image == null)
+                    image = new RealImage(FileName);
+                image.Display();
+            }
+        }
+
+        static void Main(string[] args)
+        {
+            IImage image = new ProxyImage("HiRes_Image");
+            for (int i = 0; i < 10; i++)
+                image.Display();
+        }
+    }
 }
 ```
