@@ -10,6 +10,7 @@
 - [Decorator](#decorator)
 - [Bridge](#bridge)
 - [Proxy](#proxy)
+- [Flyweight](#flyweight)
 
 ## Singleton
 
@@ -1120,6 +1121,135 @@ namespace Proxy
             IImage image = new ProxyImage("HiRes_Image");
             for (int i = 0; i < 10; i++)
                 image.Display();
+        }
+    }
+}
+```
+
+## Flyweight
+
+> 플라이웨이트 패턴은 구조 패턴 중 하나이다.  
+> 비슷한 객체끼리 가능한 많은 데이터를 공유하여 메모리 사용량을 최소화 하는게 목적인 패턴이다.  
+> 플라이웨이트 패턴의 구성은 FlyweightFactory(Flyweight를 생성 또는 공유), Flyweight(추상 인터페이스), ConcreteFlyweight(Flyweight를 구현 실제로 공유되는 객체)로 구성되어 있다.
+
+1. 프로그램이 너무 많은 객체를 사용하며, 객체가 너무 많아서 메모리 비용이 높을때, 또 대부분 개체 상태를 추출 가능할때 사용한다.
+2. 메모리 비용을 줄이기 위해서 임계 영역을 만드는 패턴이라고 볼 수 있다. 하나의 인스턴스로 여러 인스턴스를 제공한다는 점에서 싱글턴과 유사하다.
+3. 당연하지만 기존 임계영역 문제와 비슷한 문제가 발생한다. 상태공유를 통한 동기화, 상태값 변경을 통한 멀티 스레드 또는 프로세스간의 영향등이 있다.
+
+### 예제
+
+1. Java
+```java
+public enum FontEffect {
+    BOLD, ITALIC, SUPERSCRIPT, SUBSCRIPT, STRIKETHROUGH
+}
+
+public final class FontData {
+    /**
+     * A weak hash map will drop unused references to FontData.
+     * Values have to be wrapped in WeakReferences,
+     * because value objects in weak hash map are held by strong references.
+     */
+    private static final WeakHashMap<FontData, WeakReference<FontData>> flyweightData =
+        new WeakHashMap<FontData, WeakReference<FontData>>();
+    private final int pointSize;
+    private final String fontFace;
+    private final Color color;
+    private final Set<FontEffect> effects;
+
+    private FontData(int pointSize, String fontFace, Color color, EnumSet<FontEffect> effects) {
+        this.pointSize = pointSize;
+        this.fontFace = fontFace;
+        this.color = color;
+        this.effects = Collections.unmodifiableSet(effects);
+    }
+
+    public static FontData create(int pointSize, String fontFace, Color color,
+        FontEffect... effects) {
+        EnumSet<FontEffect> effectsSet = EnumSet.noneOf(FontEffect.class);
+        for (FontEffect fontEffect : effects) {
+            effectsSet.add(fontEffect);
+        }
+        // 객체를 생성하는 데 드는 비용이나 객체가 차지하는 메모리 공간에 대해 걱정할 필요가 없다.
+        FontData data = new FontData(pointSize, fontFace, color, effectsSet);
+        if (!flyweightData.containsKey(data)) {
+            flyweightData.put(data, new WeakReference(data));
+        }
+        // 해시값에 따라 변경불가능한 단일본을 리턴한다.
+        return flyweightData.get(data).get();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof FontData) {
+            if (obj == this) {
+                return true;
+            }
+            FontData other = (FontData) obj;
+            return other.pointSize == pointSize && other.fontFace.equals(fontFace)
+                && other.color.equals(color) && other.effects.equals(effects);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return (pointSize * 37 + effects.hashCode() * 13) * fontFace.hashCode();
+    }
+
+    // Getters for the font data, but no setters. FontData is immutable.
+}
+```
+2. C#
+```C#
+using System.Collections;
+using System.Collections.Generic;
+using System;
+
+class GraphicChar {
+    char c;
+    string fontFace;
+    public GraphicChar(char c, string fontFace) { this.c = c; this.fontFace = fontFace; }
+    public static void printAtPosition(GraphicChar c, int x, int y)   {
+        Console.WriteLine("Printing '{0}' in '{1}' at position {2}:{3}.", c.c, c.fontFace, x, y);
+    }
+}
+
+class GraphicCharFactory {
+    Hashtable pool = new Hashtable(); // the Flyweights
+
+    public int getNum() { return pool.Count; }
+
+    public GraphicChar get(char c, string fontFace) {
+        GraphicChar gc;
+        string key = c.ToString() + fontFace;
+        gc = pool[key] as GraphicChar;
+        if (gc == null) {
+            gc = new GraphicChar(c, fontFace);
+            pool.Add(key, gc);
+        }
+        return gc;
+    }
+}
+
+class FlyWeightExample {
+    public static void Main(string[] args) {
+        GraphicCharFactory cf = new GraphicCharFactory();
+
+        // Compose the text by storing the characters as objects.
+        List<GraphicChar> text = new List<GraphicChar>();
+        text.Add(cf.get('H', "Arial"));    // 'H' and "Arial" are called intrinsic information
+        text.Add(cf.get('e', "Arial"));    // because it is stored in the object itself.
+        text.Add(cf.get('l', "Arial"));
+        text.Add(cf.get('l', "Arial"));
+        text.Add(cf.get('o', "Times"));
+
+        // See how the Flyweight approach is beginning to save space:
+        Console.WriteLine("CharFactory created only {0} objects for {1} characters.", cf.getNum(), text.Count);
+
+        int x=0, y=0;
+        foreach (GraphicChar c in text) {             // Passing position as extrinsic information to the objects,
+            GraphicChar.printAtPosition(c, x++, y);   // as a top-left 'A' is not different from a top-right one.
         }
     }
 }
