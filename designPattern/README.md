@@ -11,6 +11,7 @@
 - [Bridge](#bridge)
 - [Proxy](#proxy)
 - [Flyweight](#flyweight)
+- [Facade](#Facade)
 
 ## Singleton
 
@@ -1252,5 +1253,162 @@ class FlyWeightExample {
             GraphicChar.printAtPosition(c, x++, y);   // as a top-left 'A' is not different from a top-right one.
         }
     }
+}
+```
+
+## Facade
+
+> 퍼사드 패턴은 구조 패턴 중 하나이다.  
+> 퍼사드 패턴은 소프트웨어의 큰 부분을 간략하게 사용 할 수 있는 인터페이스를 제공하는 패턴이다.  
+> 퍼사드 패턴은 Client(유저, 호출 프로그램), Facade(호출 통합 인터페이스), Sub(호출 되는 로직들)로 구성 되어 있다.
+
+1. 퍼사드 패턴은 클라이언트 즉 사용자와 서브시스템 즉 시스템 동작 로직간의 의존성을 분리하는데 좋다.
+2. 확장성을 고려해서 클라이언트와 시스템의 결합도를 낮춘다. 사용자 입장에서 다른 클래스의 로직을 관여하지 않아도 되어서 시스템 로직을 은닉하기 좋다.
+3. 이미 다 조금씩 필요성 느껴서 응용해서 쓰고 있던 입장에선 너무 당연한것들이라 뭘 더 설명해야할지 모르겠다.
+
+### 예제
+
+1.Java
+```java
+/* Complex parts */
+
+class CPU {
+	public void freeze() { ... }
+	public void jump(long position) { ... }
+	public void execute() { ... }
+}
+
+class Memory {
+	public void load(long position, byte[] data) {
+		...
+	}
+}
+
+class HardDrive {
+	public byte[] read(long lba, int size) {
+		...
+	}
+}
+
+/* Façade */
+
+class Computer {
+	public void startComputer() {
+        CPU cpu = new CPU();
+        Memory memory = new Memory();
+        HardDrive hardDrive = new HardDrive();
+		cpu.freeze();
+		memory.load(BOOT_ADDRESS, hardDrive.read(BOOT_SECTOR, SECTOR_SIZE));
+		cpu.jump(BOOT_ADDRESS);
+		cpu.execute();
+	}
+}
+
+/* Client */
+
+class You {
+	public static void main(String[] args) throws ParseException {
+		Computer facade = /* grab a facade instance */;
+		facade.startComputer();
+	}
+}
+```
+2. C#
+```C#
+// Facade pattern -- Structural example
+
+using System;
+
+namespace DoFactory.GangOfFour.Facade.Structural
+{
+
+  // Mainapp test application
+
+  class MainApp
+  {
+    public static void Main()
+    {
+      Facade facade = new Facade();
+
+      facade.MethodA();
+      facade.MethodB();
+
+      // Wait for user
+      Console.Read();
+    }
+  }
+
+  // "Subsystem ClassA"
+
+  class SubSystemOne
+  {
+    public void MethodOne()
+    {
+      Console.WriteLine(" SubSystemOne Method");
+    }
+  }
+
+  // Subsystem ClassB"
+
+  class SubSystemTwo
+  {
+    public void MethodTwo()
+    {
+      Console.WriteLine(" SubSystemTwo Method");
+    }
+  }
+
+  // Subsystem ClassC"
+
+  class SubSystemThree
+  {
+    public void MethodThree()
+    {
+      Console.WriteLine(" SubSystemThree Method");
+    }
+  }
+
+  // Subsystem ClassD"
+
+  class SubSystemFour
+  {
+    public void MethodFour()
+    {
+      Console.WriteLine(" SubSystemFour Method");
+    }
+  }
+
+  // "Facade"
+
+  class Facade
+  {
+    SubSystemOne one;
+    SubSystemTwo two;
+    SubSystemThree three;
+    SubSystemFour four;
+
+    public Facade()
+    {
+      one = new SubSystemOne();
+      two = new SubSystemTwo();
+      three = new SubSystemThree();
+      four = new SubSystemFour();
+    }
+
+    public void MethodA()
+    {
+      Console.WriteLine("\nMethodA() ---- ");
+      one.MethodOne();
+      two.MethodTwo();
+      four.MethodFour();
+    }
+
+    public void MethodB()
+    {
+      Console.WriteLine("\nMethodB() ---- ");
+      two.MethodTwo();
+      three.MethodThree();
+    }
+  }
 }
 ```
