@@ -4,14 +4,15 @@
 - [Prototype](#prototype)
 - [Builder](#builder)
 - [Factory Method](#factory-method)
-- [Abstract Factory](#abstract-Factory)
+- [Abstract Factory](#abstract-factory)
 - [Adapter](#adapter)
 - [Composite](#composite)
 - [Decorator](#decorator)
 - [Bridge](#bridge)
 - [Proxy](#proxy)
 - [Flyweight](#flyweight)
-- [Facade](#Facade)
+- [Facade](#facade)
+- [Command](#command)
 
 ## Singleton
 
@@ -1410,5 +1411,195 @@ namespace DoFactory.GangOfFour.Facade.Structural
       three.MethodThree();
     }
   }
+}
+```
+
+## Command
+
+> 커맨드 패턴은 행위(Behavioral) 패턴 중 하나이다.  
+> 실행될 요청을 객체로 캡슐화해서 저장하거나 재사용, 또는 로깅 하는 패턴이다.  
+> 커맨드 패턴은 Command(요청 인터페이스, execute), ConcreteCommand(커맨드를 구현한 실제 요청 객체, execute), Invoker(호출자 클래스), Receiver(ConcreteCommand 구현에 필요한 클래스)로 구성 되어 있다.
+
+1. 행위 패턴은 요청을 캡슐화하여 기능이 추가되더라도 OCP원칙을 지키면서 요청을 추가 할 수 있게해준다.
+2. 프록시 패턴, 패사드 패턴이랑 큰 맥락에서는 차이를 못찾겠다.
+3. 요청에서 실행할 커맨드들을 셋하고, 그걸 처리한다. 이런점은 빌더 패턴과도 유사하다.
+4. SOLID 원칙을 지키는 선에서 만들어지는 구조라 그런가 기능이 유사하고 원리가 비슷한 패턴들이 많다. 이런 미묘한 것을 구분해서 설명하는건 난감하다.
+
+### 예제
+
+1. Java
+```java
+/*the Invoker class*/
+public class Switch {
+    private Command flipUpCommand;
+    private Command flipDownCommand;
+
+    public Switch(Command flipUpCmd,Command flipDownCmd){
+        this.flipUpCommand=flipUpCmd;
+        this.flipDownCommand=flipDownCmd;
+    }
+
+    public void flipUp(){
+         flipUpCommand.execute();
+    }
+
+    public void flipDown(){
+         flipDownCommand.execute();
+    }
+}
+
+/*Receiver class*/
+
+public class Light{
+     public Light(){  }
+
+     public void turnOn(){
+        System.out.println("The light is on");
+     }
+
+     public void turnOff(){
+        System.out.println("The light is off");
+     }
+}
+
+
+/*the Command interface*/
+
+public interface Command{
+    void execute();
+}
+
+
+/*the Command for turning on the light*/
+
+public class TurnOnLightCommand implements Command{
+   private Light theLight;
+
+   public TurnOnLightCommand(Light light){
+        this.theLight=light;
+   }
+
+   public void execute(){
+      theLight.turnOn();
+   }
+}
+
+/*the Command for turning off the light*/
+
+public class TurnOffLightCommand implements Command{
+   private Light theLight;
+
+   public TurnOffLightCommand(Light light){
+        this.theLight=light;
+   }
+
+   public void execute(){
+      theLight.turnOff();
+   }
+}
+
+/*The test class*/
+public class TestCommand{
+   public static void main(String[] args){
+       Light light=new Light();
+       Command switchUp=new TurnOnLightCommand(light);
+       Command switchDown=new TurnOffLightCommand(light);
+
+       Switch s=new Switch(switchUp,switchDown);
+
+       s.flipUp();
+       s.flipDown();
+   }
+}
+```
+2. C++
+```C++
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+class Command{
+  public:
+   virtual void execute(void) =0;
+   virtual ~Command(void){};
+};
+
+class Ingredient : public Command {
+  public:
+   Ingredient(string amount, string ingredient){
+      _ingredient = ingredient;
+      _amount = amount;
+   }
+   void execute(void){
+      cout << " *Add " << _amount << " of " << _ingredient << endl;
+   }
+  private:
+   string _ingredient;
+   string _amount;
+};
+
+class Step : public Command {
+  public:
+   Step(string action, string time){
+      _action= action;
+      _time= time;
+   }
+   void execute(void){
+      cout << " *" << _action << " for " << _time << endl;
+   }
+  private:
+   string _time;
+   string _action;
+};
+
+class CmdStack{
+  public:
+   void add(Command *c) {
+      commands.push_back(c);
+   }
+   void createRecipe(void){
+      for(vector<Command*>::size_type x=0;x<commands.size();x++){
+         commands[x]->execute();
+      }
+   }
+   void undo(void){
+      if(commands.size() >= 1) {
+         commands.pop_back();
+      }
+      else {
+         cout << "Can't undo" << endl;
+      }
+   }
+  private:
+   vector<Command*> commands;
+};
+
+int main(void) {
+   CmdStack list;
+
+   //Create ingredients
+   Ingredient first("2 tablespoons", "vegetable oil");
+   Ingredient second("3 cups", "rice");
+   Ingredient third("1 bottle","Ketchup");
+   Ingredient fourth("4 ounces", "peas");
+   Ingredient fifth("1 teaspoon", "soy sauce");
+
+   //Create Step
+   Step step("Stir-fry","3-4 minutes");
+
+   //Create Recipe
+   cout << "Recipe for simple Fried Rice" << endl;
+   list.add(&first);
+   list.add(&second);
+   list.add(&step);
+   list.add(&third);
+   list.undo();
+   list.add(&fourth);
+   list.add(&fifth);
+   list.createRecipe();
+   cout << "Enjoy!" << endl;
+   return 0;
 }
 ```
