@@ -13,6 +13,7 @@
 - [Flyweight](#flyweight)
 - [Facade](#facade)
 - [Command](#command)
+- [Observer](#observer)
 
 ## Singleton
 
@@ -1420,7 +1421,7 @@ namespace DoFactory.GangOfFour.Facade.Structural
 > 실행될 요청을 객체로 캡슐화해서 저장하거나 재사용, 또는 로깅 하는 패턴이다.  
 > 커맨드 패턴은 Command(요청 인터페이스, execute), ConcreteCommand(커맨드를 구현한 실제 요청 객체, execute), Invoker(호출자 클래스), Receiver(ConcreteCommand 구현에 필요한 클래스)로 구성 되어 있다.
 
-1. 행위 패턴은 요청을 캡슐화하여 기능이 추가되더라도 OCP원칙을 지키면서 요청을 추가 할 수 있게해준다.
+1. 커맨드 패턴은 요청을 캡슐화하여 기능이 추가되더라도 OCP원칙을 지키면서 요청을 추가 할 수 있게해준다.
 2. 프록시 패턴, 패사드 패턴이랑 큰 맥락에서는 차이를 못찾겠다.
 3. 요청에서 실행할 커맨드들을 셋하고, 그걸 처리한다. 이런점은 빌더 패턴과도 유사하다.
 4. SOLID 원칙을 지키는 선에서 만들어지는 구조라 그런가 기능이 유사하고 원리가 비슷한 패턴들이 많다. 이런 미묘한 것을 구분해서 설명하는건 난감하다.
@@ -1601,5 +1602,141 @@ int main(void) {
    list.createRecipe();
    cout << "Enjoy!" << endl;
    return 0;
+}
+```
+
+## Observer
+
+> 옵저버 패턴은 행위 패턴 중 하나이다. 그중에서 객체 상태에 관련된 패턴이다.  
+> 객체 상태변화를 다른 객체에 전파하는 일대다 객체 의존 관계를 구성한다. 발행/구독 모델  
+> 옵저버 패턴은 Observer(데이터 변경을 통보 받는 인터페이스, 구독모델), Subject(관찰 대상, 이벤트 발행), ConcreteSubject(발행 되는 상태가 있는 클래스 상태를 변경하고 Subject를 호출하여 Observer객체에 변경을 통보함.), ConcreteObserver(상태 변경을 구독하는 클래스, Observer의 인터페이스를 구현하여 변경을 통보받고, ConcreteSubject를 통해서 변경을 조회함)로 구성 되어 있다.
+
+1. 외부의 이벤트에 응답한다거나, 객체 상태 값 변경에 따른 응답등에 많이 쓰인다. 스토어 같은 것이 해당 패턴을 이용해서 구현된다.
+2. 옵저버 패턴은 MVC패러다임의 느슨한 연결을 위해서 자주 활용되는 편이며, 프론트엔드에서의 모델과 뷰간의 이벤트 전파에도 많이 활용된다.
+3. 이벤트 전파를 Subject와 Observer로 일반화한다. 이를 통해서 이벤트 발행과 구독에 대한 의존성을 없앨 수 있어서, 구독 모델 변경이 발행 모델의 변경 없이 가능해진다
+
+### 예제
+
+1. Java
+```java
+/* 파일명 : EventSource.java */
+
+package obs;
+import java.util.Observable; // 이 부분이 옵저버에게 신호를 보내는 주체입니다.
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+public class EventSource extends Observable implements Runnable
+{
+    public void run()
+    {
+        try
+        {
+            final InputStreamReader isr = new InputStreamReader( System.in );
+            final BufferedReader br = new BufferedReader( isr );
+            while( true )
+            {
+                final String response = br.readLine();
+                setChanged();
+                notifyObservers( response );
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+}
+/* 파일명: ResponseHandler.java */
+
+package obs;
+
+import java.util.Observable;
+import java.util.Observer; /* 여기가 옵저버 */
+
+public class ResponseHandler implements Observer
+{
+    private String resp;
+    public void update (Observable obj, Object arg)
+    {
+        if (arg instanceof String)
+        {
+            resp = (String) arg;
+            System.out.println("\nReceived Response: "+ resp );
+        }
+    }
+}
+/* 파일명 : myapp.java */
+/* 여기서부터가 프로그램 시작점 */
+
+package obs;
+
+public class MyApp
+{
+    public static void main(String args[])
+    {
+        System.out.println("Enter Text >");
+
+        // 이벤트 발행 주체를 생성함 - stdin으로부터 문자열을 입력받음
+        final EventSource evSrc = new EventSource();
+
+        // 옵저버를 생성함
+        final ResponseHandler respHandler = new ResponseHandler();
+
+        // 옵저버가 발행 주체가 발행하는 이벤트를 구독하게 함
+        evSrc.addObserver( respHandler );
+
+        // 이벤트를 발행시키는 쓰레드 시작
+        Thread thread = new Thread(evSrc);
+        thread.start();
+    }
+}
+```
+
+2. C#
+```C#
+using System;
+
+// 먼저 이벤트 발생에 사용할 델리게이트 형식을 선언한다.
+// 이것은 System.EventHandler 형식과 같은 델리게이트이다.
+// 이 델리게이트는 추상 옵저버로서의 기능을 제공한다.
+// 어떠한 구현도 제공하지 않으며, 단지 규약만 제공한다.
+public delegate void EventHandler(object sender, EventArgs e);
+
+// 다음으로, 공개된 이벤트를 선언한다. 이것은 구체적인 서브젝트로서의 기능을 제공한다.
+public class Button
+{
+    // 공개된 이벤트를 선언한다.
+    public event EventHandler Clicked;
+
+    // 관습적으로, .NET 이벤트 발생은 가상 메서드로 구현된다.
+    // 이는 하위 클래스가 해당 이벤트를 재정의를 통해 사용할 수 있게 하고, 발생 여부도 조정할 수 있게 한다.
+    protected virtual void OnClicked(EventArgs e)
+    {
+        // Clicked 이벤트에 등록된 모든 EventHandler 델리게이트를 호출한다.
+        if (Clicked != null)
+            Clicked(this, e);
+    }
+}
+
+// 이제 옵서버 클래스에서 이벤트에 델리게이트를 등록하거나 등록 해제할 수 있다:
+public class Window
+{
+    private Button okButton;
+
+    public Window()
+    {
+        okButton = new Button();
+
+        // Clicked 이벤트에 델리게이트를 등록하는 부분이다. 등록 해제는 -= 연산자를 사용한다.
+        // 다수의 옵서버가 Clicked 이벤트에 델리게이트를 등록하는 것이 가능하다.
+        okButton.Clicked += new EventHandler(okButton_Clicked);
+    }
+
+    private void okButton_Clicked(object sender, EventArgs e)
+    {
+        // 이 메서드는 Button 클래스에서 Clicked(this, e) 를 호출할 때마다 실행된다.
+    }
 }
 ```
