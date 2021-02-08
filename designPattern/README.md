@@ -14,6 +14,7 @@
 - [Facade](#facade)
 - [Command](#command)
 - [Observer](#observer)
+- [Memento](#memento)
 
 ## Singleton
 
@@ -1739,4 +1740,115 @@ public class Window
         // 이 메서드는 Button 클래스에서 Clicked(this, e) 를 호출할 때마다 실행된다.
     }
 }
+```
+
+## Memento
+
+> 메멘토 패턴은 행위 패턴중 하나이다. 그중 객체 상태 롤백에 관한 패턴이다.  
+> 객체의 상태를 외부로 노출 하지 않으며, 상태를 메모리에 저장 해두었다 특정시점으로 복원한다.  
+> 메멘토 패턴은 Originator(메멘토 생성 후 스냅샷을 저장), Memento(Originator 상태를 저장 Originator통해서만 접근가능), CareTaker(Memento를 저장)으로 구성 되어있다.
+
+1. 객체 내부 상태를 외부적을 저장 되어야 객체가 그 상태로 복구할 수 있다.  객체의 캡슐화 유지
+2. Originator객체가 메멘토 객체를 생성하여 상태를 저장 하는 책임과 이전 상태로 복구하는 책임을 가진다.
+3. 메모리 관리 전략과 롤백시 해당 Originator 객체의 상태가 프로그램에 어떤 영향을 미치는지를 고려해야한다.
+4. 메모이제이션 기법과 착각을 했지만 사실 서로 다른 것이다, 객체의 이전 상태를 기억한다는 점에서는 유사한거 같기도하다.
+
+### 예제
+
+1.Java
+```java
+import java.util.List;
+import java.util.ArrayList;
+class Originator {
+    private String state;
+    // The class could also contain additional data that is not part of the
+    // state saved in the memento..
+ 
+    public void set(String state) {
+        this.state = state;
+        System.out.println("Originator: Setting state to " + state);
+    }
+ 
+    public Memento saveToMemento() {
+        System.out.println("Originator: Saving to Memento.");
+        return new Memento(this.state);
+    }
+ 
+    public void restoreFromMemento(Memento memento) {
+        this.state = memento.getSavedState();
+        System.out.println("Originator: State after restoring from Memento: " + state);
+    }
+ 
+    public static class Memento {
+        private final String state;
+
+        public Memento(String stateToSave) {
+            state = stateToSave;
+        }
+ 
+        // accessible by outer class only
+        private String getSavedState() {
+            return state;
+        }
+    }
+}
+ 
+class Caretaker {
+    public static void main(String[] args) {
+        List<Originator.Memento> savedStates = new ArrayList<Originator.Memento>();
+ 
+        Originator originator = new Originator();
+        originator.set("State1");
+        originator.set("State2");
+        savedStates.add(originator.saveToMemento());
+        originator.set("State3");
+        // We can request multiple mementos, and choose which one to roll back to.
+        savedStates.add(originator.saveToMemento());
+        originator.set("State4");
+ 
+        originator.restoreFromMemento(savedStates.get(1));   
+    }
+}
+```
+2. python
+```py
+"""
+Memento pattern example.
+"""
+
+class Memento(object):
+    def __init__(self, state):
+        self._state = state
+
+    def get_saved_state(self):
+        return self._state
+
+class Originator(object):
+    _state = ""
+
+    def set(self, state):
+        print("Originator: Setting state to", state)
+        self._state = state
+
+    def save_to_memento(self):
+        print("Originator: Saving to Memento.")
+        return Memento(self._state)
+
+    def restore_from_memento(self, memento):
+        self._state = memento.get_saved_state()
+        print("Originator: State after restoring from Memento:", self._state)
+
+
+saved_states = []
+originator = Originator()
+originator.set("State1")
+originator.set("State2")
+saved_states.append(originator.save_to_memento())
+
+originator.set("State3")
+saved_states.append(originator.save_to_memento())
+
+originator.set("State4")
+
+originator.restore_from_memento(saved_states[0])
 ```
