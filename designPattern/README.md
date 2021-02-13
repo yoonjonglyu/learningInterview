@@ -15,6 +15,7 @@
 - [Command](#command)
 - [Observer](#observer)
 - [Memento](#memento)
+- [State](#state)
 
 ## Singleton
 
@@ -1851,4 +1852,64 @@ saved_states.append(originator.save_to_memento())
 originator.set("State4")
 
 originator.restore_from_memento(saved_states[0])
+```
+
+## State
+
+> 스테이트 패턴은 행위 패턴중 하나이다. 객체의 상태에 관한 패턴이다.  
+> 객체의 상태를 파생클래스로 구현하여서, 객체의 상태를 캡슐화하는 패턴으로, 각 상태 별 인터페이스 변동이 용이해진다.  
+> 상태 패턴은 Context(해당 상태들을 포함하는 객체), State(여러 상태 클래스의 공통 인터페이스), ConcreateState(State에 따라 구현된 각 상태)로 구성 되어 있다.
+
+1. 커다란 특정 객체를 각 상태별로 캡슐화하여서 조금 더 책임을 쪼개는데 의미가 있다.
+2. 전략 패턴과 유사하며, 객체 상태를 변경(분기) 하여서 객체가 할 수 있는 행위를 변경한다.
+3. 하나의 객체에서 파생하는 여러 객체를 다루는 상황이면 전략패턴을, 하나의 객체의 여러 상태를 다루는 상황이면 상태 패턴이 적합하다.
+
+### 예제
+
+1. java
+```java
+interface Statelike {
+    void writeName(StateContext context, String name);
+}
+
+class StateLowerCase implements Statelike {
+    @Override
+    public void writeName(final StateContext context, final String name) {
+        System.out.println(name.toLowerCase());
+        context.setState(new StateMultipleUpperCase());
+    }
+}
+
+class StateMultipleUpperCase implements Statelike {
+    /** Counter local to this state */
+    private int count = 0;
+
+    @Override
+    public void writeName(final StateContext context, final String name) {
+        System.out.println(name.toUpperCase());
+        /* Change state after StateMultipleUpperCase's writeName() gets invoked twice */
+        if(++count > 1) {
+            context.setState(new StateLowerCase());
+        }
+    }
+}
+class StateContext {
+    private Statelike myState;
+    StateContext() {
+        setState(new StateLowerCase());
+    }
+
+    /**
+     * Setter method for the state.
+     * Normally only called by classes implementing the State interface.
+     * @param newState the new state of this context
+     */
+    void setState(final Statelike newState) {
+        myState = newState;
+    }
+
+    public void writeName(final String name) {
+        myState.writeName(this, name);
+    }
+}
 ```
