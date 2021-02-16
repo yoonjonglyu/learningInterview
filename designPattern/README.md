@@ -16,6 +16,7 @@
 - [Observer](#observer)
 - [Memento](#memento)
 - [State](#state)
+- [Strategy](#Strategy)
 
 ## Singleton
 
@@ -1910,6 +1911,107 @@ class StateContext {
 
     public void writeName(final String name) {
         myState.writeName(this, name);
+    }
+}
+```
+
+## Strategy
+
+> 전략 패턴은 행위 패턴 중 하나이다. 그 중 비즈니스 로직들에 관한 패턴이다.  
+> 비즈니스 로직을 캡슐화하여 동적으로 자유롭게 교체 할 수 있다.  
+> 전략 패턴은 Context(전략을 setter해서 목적을 수행), Strategy(공통 인터페이스로 비즈니스 로직과, 호출 방법을 명시), ConcreteStrategy(전략을 실제로 구현한 클래스)로 구성되어 있다.
+
+1. 상태 패턴과 상당히 유사하며, 상태 패턴보다 비교적 자주 사용되는 패턴이다.
+2. 상태패턴은 특정 객체(프로그램)의 상태 변화를 캡슐화한다면, 전략(정책) 패턴은 객체의 행위를 캡슐화한다.
+3. OCP에 관한 디자인 패턴이다.
+4. 좀 더 엄격히 구분해보면 상태 패턴이 전략 패턴을 포함한다고 볼 수 있다. 특정 객체 상태에 여러 전략이 포함되기 때문이다.
+5. 상태 패턴과 전략 패턴의 적절한 적용 기준은 결국 프로그램 규모와 복잡도에 관련 있다.
+
+### 예제
+
+1. C#
+```C#
+public class StrategyPatternWiki
+{
+    public static void Main(String[] args)
+    {
+        Customer firstCustomer = new Customer(new NormalStrategy());
+
+        // Normal billing
+        firstCustomer.Add(1.0, 1);
+
+        // Start Happy Hour
+        firstCustomer.Strategy = new HappyHourStrategy();
+        firstCustomer.Add(1.0, 2);
+
+        // New Customer
+        Customer secondCustomer = new Customer(new HappyHourStrategy());
+        secondCustomer.Add(0.8, 1);
+        // The Customer pays
+        firstCustomer.PrintBill();
+
+        // End Happy Hour
+        secondCustomer.Strategy = new NormalStrategy();
+        secondCustomer.Add(1.3, 2);
+        secondCustomer.Add(2.5, 1);
+        secondCustomer.PrintBill();
+    }
+}
+
+
+class Customer
+{
+    private IList<double> drinks;
+
+    // Get/Set Strategy
+    public IBillingStrategy Strategy { get; set; }
+
+    public Customer(IBillingStrategy strategy)
+    {
+        this.drinks = new List<double>();
+        this.Strategy = strategy;
+    }
+
+    public void Add(double price, int quantity)
+    {
+        drinks.Add(Strategy.GetActPrice(price * quantity));
+    }
+
+    // Payment of bill
+    public void PrintBill()
+    {
+        double sum = 0;
+        foreach (double i in drinks)
+        {
+            sum += i;
+        }
+        Console.WriteLine("Total due: " + sum);
+        drinks.Clear();
+    }
+}
+
+interface IBillingStrategy
+{
+    double GetActPrice(double rawPrice);
+}
+
+// Normal billing strategy (unchanged price)
+class NormalStrategy : IBillingStrategy
+{
+    public double GetActPrice(double rawPrice)
+    {
+        return rawPrice;
+    }
+
+}
+
+// Strategy for Happy hour (50% discount)
+class HappyHourStrategy : IBillingStrategy
+{
+
+    public double GetActPrice(double rawPrice)
+    {
+        return rawPrice * 0.5;
     }
 }
 ```
