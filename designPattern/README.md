@@ -17,7 +17,7 @@
 - [Memento](#memento)
 - [State](#state)
 - [Strategy](#Strategy)
-- [FactoryMethod](#factoryMethod)
+- [Template Method](#template-method)
 
 ## Singleton
 
@@ -2017,112 +2017,52 @@ class HappyHourStrategy : IBillingStrategy
 }
 ```
 
-## FactoryMethod
+## Template Method
 
-> 팩토리메서드 패턴은 행위 패턴 중 하나이다. 그 중 객체 생성에 관한 패턴이다.  
-> 객체 생성처리를 서브클래스로 분리해서 자식 클래스에서 처리한다.
-> 팩토리 메서드 패턴은 Product(객체 공통 인터페이스), ConcreteProduct(구체적으로 객체가 생성되는 클래스), Creator(팩토리 메서드 클래스),ConcreteCretor(팩토리 메서드 구현 클래스 ConcreteProduct 객체 생성)으로 구성 되어 있다.
+> 템플릿메서드 패턴은 행위 패턴 중 하나이다. 비즈니스 로직에 대한 패턴이다.
+> 비즈니스 로직 일부를 캡슐화해서 중복 코드를 최소화한다.
+> 템플릿 메서드 패턴은 AbstractClass(추상 클래스 공통 로직 및 하위 인터페이스정의), ConcreteClass(상속받은 Primitive & Hook을 상황에 맞게 구현)으로 구성되어있다.
 
-1. 특정 프로그램에서 원하는 객체를 생성하는 코드는 자주 중복된다. 
-2. 객체생성과 관련한 변화가 모든 코드에 영향을 미치는걸 막기 위함, 즉 객체 생성을 캡슐화한다.
-3. 팩토리 메서드의 경우 팩토리 클래스를 사용하여서 스트래티지와 싱글턴 패턴을 이용한다.
-4. 탬플릿 메서드 패턴과 유사하다.
+1. 특정 프로그램에서 데이터처리를 하는 코드는 자주 중복된다. 
+2. 반복되는 로직중 일부의 다른 부분이 전체에 영향을 주지 않기 위해서 해당 부분을 캡슐화한다.
+3. 공통로직을 추상클래스에서 정의후 각 상황에 적합한 로직을 서브클래스로 캡슐화해서 구현해서 확장성을 높인다.
+4. 형식적인 점을 제외하면 결국 공통로직과 인터페이스를 미리 정의내리고 해당 부분에서 구체적인걸 상속받은 것에서 만든다 정도가 있다.
+5. 기본구조를 공통에서 모두 만들기에 당연히 하위 객체에서 처리하는 로직조차 구조는 미리 인터페이스로 정의내려져있다.
 
 
 ### 예제
 
-1. C#
-```C#
-public abstract class Pizza
-{
-    public abstract decimal GetPrice();
-
-    public enum PizzaType
-    {
-        HamMushroom, Deluxe, Seafood
+1. Java
+```Java
+public abstract class AbstractClass {
+    
+    protected abstract void hook1();
+    
+    protected abstract void hook2();
+    
+    public void templateMethod() {
+        hook1();
+        hook2();
     }
-    public static Pizza PizzaFactory(PizzaType pizzaType)
-    {
-        switch (pizzaType)
-        {
-            case PizzaType.HamMushroom:
-                return new HamAndMushroomPizza();
+    
+}
+public class ConcreteClass extends AbstractClass {
 
-            case PizzaType.Deluxe:
-                return new DeluxePizza();
+    @Override
+    protected void hook1() {
+        System.out.println("ABSTRACT hook1 implementation");
+    }
 
-            case PizzaType.Seafood:
-                return new SeafoodPizza();
+    @Override
+    protected void hook2() {
+        System.out.println("ABSTRACT hook2 implementation");
+    }
 
-        }
-
-        throw new System.NotSupportedException("The pizza type " + pizzaType.ToString() + " is not recognized.");
+}
+public class TemplateMethodPatternClient {
+    public static void main(String[] args) {
+        AbstractClass abstractClass = new ConcreteClass();
+        abstractClass.templateMethod();
     }
 }
-public class HamAndMushroomPizza : Pizza
-{
-    private decimal price = 8.5M;
-    public override decimal GetPrice() { return price; }
-}
-
-public class DeluxePizza : Pizza
-{
-    private decimal price = 10.5M;
-    public override decimal GetPrice() { return price; }
-}
-
-public class SeafoodPizza : Pizza
-{
-    private decimal price = 11.5M;
-    public override decimal GetPrice() { return price; }
-}
-
-// Somewhere in the code
-...
-  Console.WriteLine( Pizza.PizzaFactory(Pizza.PizzaType.Seafood).GetPrice().ToString("C2") ); // $11.50
-...
-```
-2. 자바스크립트
-```js
-//Our pizzas
-function HamAndMushroomPizza(){
-  var price = 8.50;
-  this.getPrice = function(){
-    return price;
-  }
-}
-
-function DeluxePizza(){
-  var price = 10.50;
-  this.getPrice = function(){
-    return price;
-  }
-}
-
-function SeafoodPizza(){
-  var price = 11.50;
-  this.getPrice = function(){
-    return price;
-  }
-}
-
-//Pizza Factory
-function PizzaFactory(){
-  this.createPizza = function(type){
-     switch(type){
-      case "Ham and Mushroom":
-        return new HamAndMushroomPizza();
-      case "DeluxePizza":
-        return new DeluxePizza();
-      case "Seafood Pizza":
-        return new SeafoodPizza();
-      default:
-          return new DeluxePizza();
-     }
-  }
-}
-
-//Usage
-var pizzaPrice = new PizzaFactory().createPizza("Ham and Mushroom").getPrice();
-alert(pizzaPrice);
 ```
